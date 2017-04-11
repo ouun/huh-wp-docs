@@ -7,7 +7,8 @@ let huhLauncher = '',
 		huhHeader = '',
 		huhBackButton = '',
 		huhAccentColor = '',
-		huhTocTriggers = '';
+		huhTocTriggers = '',
+		huhData = [];
 
 // init
 function huhInit() {
@@ -19,16 +20,24 @@ function huhInit() {
 	huhBackButton = document.querySelector( '#huh-back-to-toc' );
 	huhAccentColor = huhLauncher.getAttribute( 'data-accent-color' );
 
-	// fetch the markdown file (set in huh.php)
-	// then load the content into the container
-	fetch( huhDocUrl )
-		.then( blob => blob.text() )
-		.then( data => loadContent( data ) );
+	const grabContent = (url, i) => fetch(url)
+	     .then(res => res.text())
+	     .then(data => huhData.push({ index: i, data: data }) )
+
+	Promise
+	    .all(huhDocUrl.map(grabContent))
+	    .then(() => loadContent( huhData ) )
+	
 }
 
 function loadContent( data ) {
+	let dataRaw = '';	
+	data = _.sortBy(data, 'index');
+	data.forEach(function( obj ){
+		dataRaw += obj.data;
+	});
 	// first we format the content
-	const dataFormat = marked( data );
+	const dataFormat = marked( dataRaw );
 
 	// then we create our custom content structure
 	const content = createContent( dataFormat );

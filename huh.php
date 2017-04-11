@@ -1,4 +1,10 @@
 <?php
+/**
+ * Plugin Name: Launch Site Documentation
+ * Author: 502 Media Group & Launch Sites
+ * Description: Provides the documentation in the WordPress admin area in the bottom corner.
+ * Version: 1.0
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -20,7 +26,8 @@ class WP_Huh {
 	 * @param string $markdown_doc_url URL of the raw markdown file.
 	 */
 	public function init( $markdown_doc_url ) {
-		$this->markdown_doc_url = $markdown_doc_url;
+		// Explode URLs and Trim Whitespace
+		$this->markdown_doc_url = array_map('trim', explode(',', $markdown_doc_url) );
 
 		if ( is_admin() || is_customize_preview() ) {
 			add_action( 'admin_enqueue_scripts', array( $this, 'huh_load_scripts' ) );
@@ -32,13 +39,13 @@ class WP_Huh {
 	 * Enqueue CSS and JS.
 	 */
 	public function huh_load_scripts() {
-		wp_register_style( 'huh_admin_css', get_stylesheet_directory_uri().'/huh/huh.css', false );
+		wp_register_style( 'huh_admin_css', plugin_dir_url(__FILE__).'huh.css', false );
 		wp_enqueue_style( 'huh_admin_css' );
 
-		wp_register_script( 'huh_admin_js', get_stylesheet_directory_uri().'/huh/js/huh.js', false );
+		wp_register_script( 'huh_admin_js', plugin_dir_url(__FILE__).'js/huh.js', array('underscore') );
 		wp_enqueue_script( 'huh_admin_js' );
 
-		wp_register_script( 'huh_markdown_js', get_stylesheet_directory_uri().'/huh/js/marked.js', false );
+		wp_register_script( 'huh_markdown_js', plugin_dir_url(__FILE__).'js/marked.js', false );
 		wp_enqueue_script( 'huh_markdown_js' );
 	}
 
@@ -85,4 +92,9 @@ class WP_Huh {
 		<?php
 	}
 
+}
+
+if ( defined('LS_DOCURLS') ){
+	$ls_docs = new WP_Huh();
+	$ls_docs->init( LS_DOCURLS );
 }

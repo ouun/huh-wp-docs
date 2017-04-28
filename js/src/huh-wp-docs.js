@@ -27,11 +27,11 @@ function huhInit() {
 	Promise
 	    .all(huhDocUrl.map(grabContent))
 	    .then(() => loadContent( huhData ) )
-	
+
 }
 
 function loadContent( data ) {
-	let dataRaw = '';	
+	let dataRaw = '';
 	data = _.sortBy(data, 'index');
 	data.forEach(function( obj ){
 		dataRaw += obj.data;
@@ -93,7 +93,7 @@ function showHideContainer( e ) {
 
 function showContent( e ) {
 	// hide all triggers
-	for ( i = 0; i < huhTocTriggers.length; i++ ) {
+	for (var i = 0; i < huhTocTriggers.length; i++ ) {
 		huhTocTriggers[i].classList.add( 'hidden' );
 		huhTocTriggers[i].classList.remove( 'show' );
 	}
@@ -112,14 +112,14 @@ function showContent( e ) {
 
 function backToToc() {
 	// show all triggers
-	for ( i = 0; i < huhTocTriggers.length; i++ ) {
+	for (var i = 0; i < huhTocTriggers.length; i++ ) {
 		huhTocTriggers[i].classList.remove( 'hidden', 'current' );
 		huhTocTriggers[i].classList.add( 'show' );
 	}
 
 	// hide all content blocks
 	const contentBlocks = document.querySelectorAll( '.huh-toc--content' );
-	for ( i = 0; i < contentBlocks.length; i++ ) {
+	for (var i = 0; i < contentBlocks.length; i++ ) {
 		contentBlocks[i].classList.remove( 'open' );
 	}
 
@@ -138,7 +138,7 @@ function huhBindEvents() {
 	huhBackButton.addEventListener( 'click', backToToc );
 
 	huhTocTriggers = document.querySelectorAll( '.huh-toc--trigger' );
-	for ( i = 0; i < huhTocTriggers.length; i++ ) {
+	for (var i = 0; i < huhTocTriggers.length; i++ ) {
 		huhTocTriggers[i].addEventListener( 'click', showContent );
 	}
 }

@@ -1,4 +1,4 @@
-module.exports = function( grunt ) {
+module.exports = function (grunt) {
 	'use strict';
 
 	grunt.initConfig({
@@ -13,14 +13,14 @@ module.exports = function( grunt ) {
 			compile: {
 				options: {
 					sourcemap: 'none',
-					loadPath: require( 'node-bourbon' ).includePaths
+					loadPath : require('node-bourbon').includePaths
 				},
-				files: [{
+				files  : [{
 					expand: true,
-					cwd: '<%= dirs.css %>/',
-					src: ['*.scss'],
-					dest: './',
-					ext: '.css'
+					cwd   : '<%= dirs.css %>/',
+					src   : ['*.scss'],
+					dest  : './',
+					ext   : '.css'
 				}]
 			}
 		},
@@ -29,13 +29,40 @@ module.exports = function( grunt ) {
 		cssmin: {
 			minify: {
 				expand: true,
-				cwd: './',
-				src: [
+				cwd   : './',
+				src   : [
 					'*.css',
 					'!*.min.css'
 				],
-				dest: './',
-				ext: '.min.css'
+				dest  : './',
+				ext   : '.min.css'
+			}
+		},
+
+		babel: {
+			options: {
+				sourceMap: false,
+				presets: ['es2015']
+			},
+			dist: {
+				files: {
+					'js/src/huh-wp-docs-compiled.js': 'js/src/huh-wp-docs.js'
+				}
+			}
+		},
+
+		uglify: {
+			target : {
+				files: {
+					'js/huh-wp-docs.min.js': ['js/src/huh-wp-docs-compiled.js'],
+					'js/marked.min.js'     : ['js/src/marked.js']
+				},
+			},
+			options: {
+				sourceMap: false,
+				mangle   : {
+					except: ['jQuery', '_.']
+				}
 			}
 		},
 
@@ -49,17 +76,24 @@ module.exports = function( grunt ) {
 	});
 
 	// Load NPM tasks to be used here
-	grunt.loadNpmTasks( 'grunt-contrib-sass' );
-	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
-	grunt.loadNpmTasks( 'grunt-contrib-watch' );
+	grunt.loadNpmTasks('grunt-contrib-sass');
+	grunt.loadNpmTasks('grunt-contrib-cssmin');
+	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-babel');
 
 	// Register tasks
-	grunt.registerTask( 'default', [
+	grunt.registerTask('default', [
 		'css'
 	]);
 
-	grunt.registerTask( 'css', [
+	grunt.registerTask('css', [
 		'sass',
 		'cssmin'
+	]);
+
+	grunt.registerTask('js', [
+		'babel',
+		'uglify'
 	]);
 };

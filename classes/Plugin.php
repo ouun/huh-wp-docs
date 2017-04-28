@@ -22,11 +22,17 @@ class Plugin {
 	 * @param string $markdown_doc_url URL of the raw markdown file.
 	 */
 	public function init( $markdown_doc_url ) {
-		// Explode URLs and Trim Whitespace
-		$this->markdown_doc_url = array_map( 'trim', explode( ',', $markdown_doc_url ) );
+
+		if ( is_array( $markdown_doc_url ) && ! empty( $markdown_doc_url ) ) {
+
+		} else {
+			// Explode URLs and Trim Whitespace
+			$this->markdown_doc_url = array_map( 'trim', explode( ',', $markdown_doc_url ) );
+		}
 
 		if ( is_admin() || is_customize_preview() ) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'huh_load_scripts' ] );
+			add_action( 'admin_enqueue_scripts', [ $this, 'huh_data_urls' ] );
 			add_action( 'admin_footer', [ $this, 'display_huh' ] );
 		}
 	}
@@ -43,6 +49,10 @@ class Plugin {
 
 		wp_register_script( 'huh_markdown_js', plugin_dir_url( dirname( __FILE__ ) ) . 'js/marked.min.js', false );
 		wp_enqueue_script( 'huh_markdown_js' );
+	}
+
+	public function huh_data_urls() {
+		wp_localize_script( 'huh_admin_js', 'HuhWPDocs', [ 'huhDocUrl' => $this->markdown_doc_url ] );
 	}
 
 	/**
@@ -66,7 +76,7 @@ class Plugin {
 		$huh_accent_color = $colors[2];
 
 		?>
-		<script type="text/javascript">var huhDocUrl = <?php echo json_encode( $this->markdown_doc_url ); ?>;</script>
+		<!--<script type="text/javascript">var huhDocUrl = <?php echo json_encode( $this->markdown_doc_url ); ?>;</script>-->
 		<div class="huh-launcher">
 			<button class="huh-launcher--button" id="huh-launcher--button" data-accent-color="<?php echo esc_attr( $huh_accent_color ); ?>">
 				<svg class="huh-launcher--icon-enable" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><g>

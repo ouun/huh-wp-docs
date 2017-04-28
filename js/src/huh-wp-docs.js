@@ -25,7 +25,7 @@ function huhInit() {
 	     .then(data => huhData.push({ index: i, data: data }) )
 
 	Promise
-	    .all(huhDocUrl.map(grabContent))
+	    .all(HuhWPDocs.huhDocUrl.map(grabContent))
 	    .then(() => loadContent( huhData ) )
 
 }

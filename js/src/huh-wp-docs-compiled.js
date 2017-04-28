@@ -1,6 +1,6 @@
 'use strict';
 
-require('whatwg-fetch');
+// const docUrl = 'https://raw.githubusercontent.com/secretpizzaparty/huh/master/README.md';
 
 var huhLauncher = '',
     huhMobileClose = '',
@@ -13,8 +13,6 @@ var huhLauncher = '',
     huhData = [];
 
 // init
-// const docUrl = 'https://raw.githubusercontent.com/secretpizzaparty/huh/master/README.md';
-
 function huhInit() {
 	huhLauncher = document.querySelector('#huh-launcher--button');
 	huhMobileClose = document.querySelector('#huh-mobile-close');
@@ -32,7 +30,7 @@ function huhInit() {
 		});
 	};
 
-	Promise.all(huhDocUrl.map(grabContent)).then(function () {
+	Promise.all(HuhWPDocs.huhDocUrl.map(grabContent)).then(function () {
 		return loadContent(huhData);
 	});
 }

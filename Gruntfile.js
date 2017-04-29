@@ -84,7 +84,8 @@ module.exports = function (grunt) {
 
 	// Register tasks
 	grunt.registerTask('default', [
-		'css'
+		'css',
+		'js'
 	]);
 
 	grunt.registerTask('css', [

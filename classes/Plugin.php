@@ -41,9 +41,22 @@ class Plugin {
 	}
 
 	/**
+	 * Load plugin text domain.
+	 */
+	public function load_text_domain() {
+		load_plugin_textdomain( 'huh-wp-docs', false, plugin_dir_path( dirname( __FILE__ ) ) . '/languages' );
+	}
+
+	/**
 	 * Add hooks for admin and customizer preview.
 	 */
 	public function hooks() {
+
+		add_action( 'init', [ $this, 'load_text_domain' ] );
+
+		/**
+		 * Add admin hooks to display the docs in the wp-admin.
+		 */
 		if ( is_admin() ) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'load_scripts' ] );
 			add_action( 'admin_enqueue_scripts', [ $this, 'data_urls' ] );

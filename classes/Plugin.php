@@ -29,12 +29,7 @@ class Plugin {
 	 */
 	public function init( $doc_urls ) {
 
-		if ( is_array( $doc_urls ) && ! empty( $doc_urls ) ) {
-
-		} else {
-			// Explode URLs and Trim Whitespace
-			$this->doc_urls = array_map( 'trim', explode( ',', $doc_urls ) );
-		}
+		$this->set_doc_urls( $doc_urls );
 
 		$this->hooks();
 
@@ -97,14 +92,39 @@ class Plugin {
 		/**
 		 * The js functions to tie it all together.
 		 */
-		wp_enqueue_script( 'huh_script', plugin_dir_url( dirname( __FILE__ ) ) . 'js/huh-wp-docs.min.js', [ 'huh_markdown_script', 'underscore' ], self::VERSION );
+		wp_enqueue_script( 'huh_script', plugin_dir_url( dirname( __FILE__ ) ) . 'js/huh-wp-docs.min.js', [
+			'huh_markdown_script',
+			'underscore'
+		], self::VERSION );
+	}
+
+	/**
+	 * Handle different cases of doc urls.
+	 *
+	 * @param mixed $urls set of urls for markdown docs.
+	 */
+	public function set_doc_urls( $urls ) {
+		if ( is_array( $urls ) && ! empty( $urls ) ) {
+
+		} else {
+			// Explode URLs and Trim Whitespace
+			$doc_urls = array_map( 'trim', explode( ',', $urls ) );
+		}
+
+		$this->doc_urls = apply_filters( 'huh_wp_docs_filter_doc_urls', $doc_urls );
 	}
 
 	/**
 	 * Add data urls as localized inline script.
 	 */
 	public function data_urls() {
-		wp_localize_script( 'huh_script', 'HuhWPDocs', [ 'huhDocUrl' => $this->doc_urls ] );
+		$current_screen = function_exists( 'get_current_screen' )
+			? get_current_screen()->id
+			: apply_filters( 'huh_wp_docs_current_screen_non_admin', 'customizer' );
+
+		wp_localize_script( 'huh_script', 'HuhWPDocs', [
+			'huhDocUrl' => apply_filters( "huh_wp_docs_filter_doc_urls_{$current_screen}", $this->doc_urls )
+		] );
 	}
 
 	/**

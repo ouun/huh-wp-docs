@@ -9,97 +9,114 @@ namespace Required\WP_Huh;
  * Main plugin class.
  */
 class Plugin {
-	public $markdown_doc_url = null;
 
 	/**
-	 * Constructor.
+	 * Plugin version.
 	 */
-	public function __construct() {
-	}
+	const VERSION = '1.0.0';
+
+	/**
+	 * Holds the markdown doc urls.
+	 *
+	 * @var null
+	 */
+	public $doc_urls = null;
 
 	/**
 	 * Initialize.
 	 *
-	 * @param string $markdown_doc_url URL of the raw markdown file.
+	 * @param string $doc_urls URL of the raw markdown file.
 	 */
-	public function init( $markdown_doc_url ) {
+	public function init( $doc_urls ) {
 
-		if ( is_array( $markdown_doc_url ) && ! empty( $markdown_doc_url ) ) {
+		if ( is_array( $doc_urls ) && ! empty( $doc_urls ) ) {
 
 		} else {
 			// Explode URLs and Trim Whitespace
-			$this->markdown_doc_url = array_map( 'trim', explode( ',', $markdown_doc_url ) );
+			$this->doc_urls = array_map( 'trim', explode( ',', $doc_urls ) );
 		}
 
-		if ( is_admin() ) {
-			add_action( 'admin_enqueue_scripts', [ $this, 'huh_load_scripts' ] );
-			add_action( 'admin_enqueue_scripts', [ $this, 'huh_data_urls' ] );
-			add_action( 'admin_footer', [ $this, 'display_huh' ] );
-		}
+		$this->hooks();
 
-		// Load in the customizer
-		add_action( 'customize_preview_init', function () {
-			add_action( 'wp_enqueue_scripts', [ $this, 'huh_load_scripts' ] );
-			add_action( 'wp_enqueue_scripts', [ $this, 'huh_data_urls' ] );
-			add_action( 'wp_footer', [ $this, 'display_huh' ] );
-		} );
-
-
-		//add_action( 'wp_footer', [ $this, 'big_demo' ] );
 	}
 
-	public function big_demo() {
-		if ( is_customize_preview() ) {
-			$this->display_huh();
+	/**
+	 * Add hooks for admin and customizer preview.
+	 */
+	public function hooks() {
+		if ( is_admin() ) {
+			add_action( 'admin_enqueue_scripts', [ $this, 'load_scripts' ] );
+			add_action( 'admin_enqueue_scripts', [ $this, 'data_urls' ] );
+			add_action( 'admin_footer', [ $this, 'display' ] );
 		}
+
+		/**
+		 * Only show on front-end when using in the customizer preview.
+		 */
+		add_action( 'customize_preview_init', [ $this, 'frontend_hooks' ] );
+	}
+
+	/**
+	 * Hooks to enqueue docs on the front-end, for example in the customizer.
+	 */
+	public function frontend_hooks() {
+		add_action( 'wp_enqueue_scripts', [ $this, 'load_scripts' ] );
+		add_action( 'wp_enqueue_scripts', [ $this, 'data_urls' ] );
+		add_action( 'wp_footer', [ $this, 'display' ] );
 	}
 
 	/**
 	 * Enqueue CSS and JS.
 	 */
-	public function huh_load_scripts() {
-		wp_register_style( 'huh_admin_css', plugin_dir_url( dirname( __FILE__ ) ) . 'huh-wp-docs.min.css', false );
-		wp_enqueue_style( 'huh_admin_css' );
+	public function load_scripts() {
+		/**
+		 * Minimal stylesheet to make Huh WP Docs look rad.
+		 */
+		wp_enqueue_style( 'huh_style', plugin_dir_url( dirname( __FILE__ ) ) . 'huh-wp-docs.min.css', null, self::VERSION );
 
-		wp_register_script( 'huh_admin_js', plugin_dir_url( dirname( __FILE__ ) ) . 'js/huh-wp-docs.min.js', array( 'underscore' ) );
-		wp_enqueue_script( 'huh_admin_js' );
+		/**
+		 * marked.js a minimal Markdown parser.
+		 *
+		 * @see https://github.com/chjj/marked
+		 */
+		wp_enqueue_script( 'huh_markdown_script', plugin_dir_url( dirname( __FILE__ ) ) . 'js/marked.min.js', null, self::VERSION );
 
-		wp_register_script( 'huh_markdown_js', plugin_dir_url( dirname( __FILE__ ) ) . 'js/marked.min.js', false );
-		wp_enqueue_script( 'huh_markdown_js' );
+		/**
+		 * The js functions to tie it all together.
+		 */
+		wp_enqueue_script( 'huh_script', plugin_dir_url( dirname( __FILE__ ) ) . 'js/huh-wp-docs.min.js', [ 'huh_markdown_script', 'underscore' ], self::VERSION );
 	}
 
-	public function huh_data_urls() {
-		wp_localize_script( 'huh_admin_js', 'HuhWPDocs', [ 'huhDocUrl' => $this->markdown_doc_url ] );
+	/**
+	 * Add data urls as localized inline script.
+	 */
+	public function data_urls() {
+		wp_localize_script( 'huh_script', 'HuhWPDocs', [ 'huhDocUrl' => $this->doc_urls ] );
 	}
 
 	/**
 	 * Get admin color scheme.
 	 */
-	public function huh_get_admin_color() {
+	public function get_admin_color() {
 		if ( is_admin() ) {
 			global $_wp_admin_css_colors;
 			$current_color_scheme = get_user_meta( get_current_user_id(), 'admin_color', true );
 			$colors_array         = $_wp_admin_css_colors[ $current_color_scheme ]->colors;
 			$color                = $colors_array[2];
 		} else {
-			$color = '#0073aa';
+			$color = '#0073aa'; // Default admin theme blue.
 		}
 
 		return $color;
 	}
 
 	/**
-	 * Display the HTML.
-	 *
-	 * @param $markdown_doc_url URL of the raw markdown file.
+	 * Display the markup.
 	 */
-	public function display_huh() {
-		$huh_accent_color = $this->huh_get_admin_color();
-
+	public function display() {
 		?>
-		<!--<script type="text/javascript">var huhDocUrl = <?php echo json_encode( $this->markdown_doc_url ); ?>;</script>-->
 		<div class="huh-launcher">
-			<button class="huh-launcher--button" id="huh-launcher--button" data-accent-color="<?php echo esc_attr( $huh_accent_color ); ?>">
+			<button class="huh-launcher--button" id="huh-launcher--button" data-accent-color="<?php echo esc_attr( $this->get_admin_color() ); ?>">
 				<svg class="huh-launcher--icon-enable" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><g>
 						<circle cx="50" cy="63.5" r="3"></circle>
 						<g>

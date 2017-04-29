@@ -108,11 +108,18 @@
   position: fixed;
   right: 20px;
   width: 100%;
-  z-index: 500001; }
+  z-index: 500001;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+  font-size: 13px;
+  line-height: 1.4em; }
   .huh-container.open {
     animation: fadeIn 0.3s ease-in-out;
     display: flex;
     flex-direction: column; }
+  .huh-container a {
+    color: #0073aa; }
+    .huh-container a:hover {
+      color: #00a0d2; }
   @media screen and (max-width: 600px) {
     .huh-container {
       bottom: 0;

@@ -2,6 +2,7 @@
 /**
  * Main plugin file.
  */
+
 namespace Required\WP_Huh;
 
 /**
@@ -30,10 +31,26 @@ class Plugin {
 			$this->markdown_doc_url = array_map( 'trim', explode( ',', $markdown_doc_url ) );
 		}
 
-		if ( is_admin() || is_customize_preview() ) {
+		if ( is_admin() ) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'huh_load_scripts' ] );
 			add_action( 'admin_enqueue_scripts', [ $this, 'huh_data_urls' ] );
 			add_action( 'admin_footer', [ $this, 'display_huh' ] );
+		}
+
+		// Load in the customizer
+		add_action( 'customize_preview_init', function () {
+			add_action( 'wp_enqueue_scripts', [ $this, 'huh_load_scripts' ] );
+			add_action( 'wp_enqueue_scripts', [ $this, 'huh_data_urls' ] );
+			add_action( 'wp_footer', [ $this, 'display_huh' ] );
+		} );
+
+
+		//add_action( 'wp_footer', [ $this, 'big_demo' ] );
+	}
+
+	public function big_demo() {
+		if ( is_customize_preview() ) {
+			$this->display_huh();
 		}
 	}
 
@@ -58,12 +75,17 @@ class Plugin {
 	/**
 	 * Get admin color scheme.
 	 */
-	public function huh_get_admin_colors() {
-		global $_wp_admin_css_colors;
-		$current_color_scheme = get_user_meta( get_current_user_id(), 'admin_color', true );
-		$colors               = $_wp_admin_css_colors[ $current_color_scheme ]->colors;
+	public function huh_get_admin_color() {
+		if ( is_admin() ) {
+			global $_wp_admin_css_colors;
+			$current_color_scheme = get_user_meta( get_current_user_id(), 'admin_color', true );
+			$colors_array         = $_wp_admin_css_colors[ $current_color_scheme ]->colors;
+			$color                = $colors_array[2];
+		} else {
+			$color = '#0073aa';
+		}
 
-		return $colors;
+		return $color;
 	}
 
 	/**
@@ -72,8 +94,7 @@ class Plugin {
 	 * @param $markdown_doc_url URL of the raw markdown file.
 	 */
 	public function display_huh() {
-		$colors           = $this->huh_get_admin_colors();
-		$huh_accent_color = $colors[2];
+		$huh_accent_color = $this->huh_get_admin_color();
 
 		?>
 		<!--<script type="text/javascript">var huhDocUrl = <?php echo json_encode( $this->markdown_doc_url ); ?>;</script>-->

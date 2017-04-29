@@ -36,16 +36,13 @@ if ( ! class_exists( __NAMESPACE__ . '\Plugin' ) ) {
  * @since 1.0.0
  */
 function init() {
-
-	$md_docs = plugin_dir_url( __FILE__ ) . 'README.md,https://presence.dev/wp-content/plugins/cpt-casestudy/README.md';
+	/**
+	 * Default docs url.
+	 */
+	$doc_urls = 'https://raw.githubusercontent.com/neverything/huh-wp-docs/master/README.md';
 
 	$plugin = new Plugin();
-	$plugin->init( $md_docs );
+	$plugin->init( $doc_urls );
 }
 
 add_action( 'plugins_loaded', __NAMESPACE__ . '\init' );
-
-/*if ( defined( 'LS_DOCURLS' ) ) {
-	$ls_docs = new WP_Huh();
-	$ls_docs->init( LS_DOCURLS );
-}*/

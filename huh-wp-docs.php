@@ -14,6 +14,8 @@
  *
  * Note: This plugin is based on the awesome <https://secretpizza.party/huh-making-documentation-easier/> and a fork of
  * it (<https://github.com/Daronspence/huh>) that allows to use multiple markdown files. Thanks for that!
+ *
+ * @package Required\WP_Huh
  */
 
 namespace Required\WP_Huh;

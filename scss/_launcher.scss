@@ -21,6 +21,7 @@
 	transition: transform ease-out 0.1s;
 	width: 50px;
 	z-index: 1;
+	box-sizing: initial;
 
 	svg  {
 		fill: #fff;
@@ -71,6 +72,7 @@
 	&:focus {
 		outline: none;
 		transform: scale( 0.9 );
+		border: none !important;
 
 		&::after {
 			animation: sonarEffect 1.3s ease-out;

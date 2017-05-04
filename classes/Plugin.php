@@ -39,24 +39,28 @@ class Plugin {
 	 * Load plugin text domain.
 	 */
 	public function load_text_domain() {
-		load_plugin_textdomain( 'huh-wp-docs', false, plugin_dir_path( dirname( __FILE__ ) ) . '/languages' );
+		load_plugin_textdomain(
+			'huh-wp-docs',
+			false,
+			plugin_dir_path( dirname( __FILE__ ) ) . '/languages'
+		);
 	}
 
 	/**
 	 * Add hooks for admin and customizer preview.
 	 */
 	public function hooks() {
-
+		/**
+		 * General init tasks.
+		 */
 		add_action( 'init', [ $this, 'load_text_domain' ] );
+		add_action( 'init', [ $this, 'register_scripts' ] );
 
 		/**
 		 * Add admin hooks to display the docs in the wp-admin.
 		 */
-		if ( is_admin() ) {
-			add_action( 'admin_enqueue_scripts', [ $this, 'load_scripts' ] );
-			add_action( 'admin_enqueue_scripts', [ $this, 'data_urls' ] );
-			add_action( 'admin_footer', [ $this, 'display' ] );
-		}
+		add_action( 'admin_enqueue_scripts', [ $this, 'admin_load_scripts' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'data_urls' ] );
 
 		/**
 		 * Only show on front-end when using in the customizer preview.
@@ -68,34 +72,76 @@ class Plugin {
 	 * Hooks to enqueue docs on the front-end, for example in the customizer.
 	 */
 	public function frontend_hooks() {
-		add_action( 'wp_enqueue_scripts', [ $this, 'load_scripts' ] );
+		add_action( 'wp_enqueue_scripts', [ $this, 'customizer_preview_load_scripts' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'data_urls' ] );
 		add_action( 'wp_footer', [ $this, 'display' ] );
 	}
 
 	/**
+	 * Only enqueue in the customizer preview, not the customizer itself.
+	 */
+	public function customizer_preview_load_scripts() {
+		wp_enqueue_style( 'huh_style' );
+		wp_enqueue_script( 'huh_script' );
+	}
+
+	/**
+	 * Determine current screen.
+	 *
+	 * @param string $hook current screen.
+	 */
+	public function admin_load_scripts( $hook ) {
+		if ( ! is_customize_preview() ) {
+
+			wp_enqueue_style( 'huh_style' );
+			wp_enqueue_script( 'huh_script' );
+
+			/**
+			 * Fire the display action based on the current screen.
+			 */
+			add_action( "admin_footer-{$hook}", [ $this, 'display' ] );
+		}
+	}
+
+	/**
 	 * Enqueue CSS and JS.
 	 */
-	public function load_scripts() {
+	public function register_scripts() {
 		/**
 		 * Minimal stylesheet to make Huh WP Docs look rad.
 		 */
-		wp_enqueue_style( 'huh_style', plugin_dir_url( dirname( __FILE__ ) ) . 'huh-wp-docs.min.css', null, self::VERSION );
+		wp_register_style(
+			'huh_style',
+			plugin_dir_url( dirname( __FILE__ ) ) . 'huh-wp-docs.min.css',
+			null,
+			self::VERSION
+		);
 
 		/**
 		 * marked.js a minimal Markdown parser.
 		 *
 		 * @see https://github.com/chjj/marked
 		 */
-		wp_enqueue_script( 'huh_markdown_script', plugin_dir_url( dirname( __FILE__ ) ) . 'js/marked.min.js', null, self::VERSION );
+		wp_register_script(
+			'huh_markdown_script',
+			plugin_dir_url( dirname( __FILE__ ) ) . 'js/marked.min.js',
+			null,
+			self::VERSION
+		);
 
 		/**
 		 * The js functions to tie it all together.
 		 */
-		wp_enqueue_script( 'huh_script', plugin_dir_url( dirname( __FILE__ ) ) . 'js/huh-wp-docs.min.js', [
-			'huh_markdown_script',
-			'underscore'
-		], self::VERSION );
+		wp_register_script(
+			'huh_script',
+			plugin_dir_url( dirname( __FILE__ ) ) . 'js/huh-wp-docs.min.js',
+			[
+				'huh_markdown_script',
+				'underscore'
+			],
+			self::VERSION
+		);
+
 	}
 
 	/**
@@ -104,27 +150,62 @@ class Plugin {
 	 * @param mixed $urls set of urls for markdown docs.
 	 */
 	public function set_doc_urls( $urls ) {
+		$doc_urls = [];
 		if ( is_array( $urls ) && ! empty( $urls ) ) {
-
+			foreach ( $urls as $k => $v ) {
+				if ( is_array( $v ) && ! empty( $v ) ) {
+					$doc_urls[ $k ] = array_map( 'trim', $v );
+				} else {
+					// Explode URLs and Trim Whitespace
+					$doc_urls[ $k ] = array_map( 'trim', explode( ',', $v ) );
+				}
+			}
 		} else {
 			// Explode URLs and Trim Whitespace
-			$doc_urls = array_map( 'trim', explode( ',', $urls ) );
+			$doc_urls['all'] = array_map( 'trim', explode( ',', $urls ) );
 		}
 
 		$this->doc_urls = apply_filters( 'huh_wp_docs_filter_doc_urls', $doc_urls );
 	}
 
 	/**
-	 * Add data urls as localized inline script.
+	 * Add data urls to the screen.
+	 *
+	 * @param string $hook current admin screen hook.
 	 */
-	public function data_urls() {
-		$current_screen = function_exists( 'get_current_screen' )
-			? get_current_screen()->id
-			: apply_filters( 'huh_wp_docs_current_screen_non_admin', 'customizer' );
+	public function data_urls( $hook ) {
+		if ( is_customize_preview() ) {
+			$hook = 'customizer';
+		}
+		wp_localize_script(
+			'huh_script',
+			'HuhWPDocs',
+			[
+				'huhDocUrl' => apply_filters( "huh_wp_docs_filter_doc_urls_{$hook}", $this->get_doc_urls( $hook ) )
+			]
+		);
+	}
 
-		wp_localize_script( 'huh_script', 'HuhWPDocs', [
-			'huhDocUrl' => apply_filters( "huh_wp_docs_filter_doc_urls_{$current_screen}", $this->doc_urls )
-		] );
+	/**
+	 * Prepare the doc urls.
+	 *
+	 * @param string $hook current screen hook.
+	 *
+	 * @return array of doc urls for this hook.
+	 */
+	public function get_doc_urls( $hook ) {
+		$all = [];
+		$current_hook = [];
+
+		if ( array_key_exists( 'all', $this->doc_urls ) ) {
+			$all = $this->doc_urls['all'];
+		}
+
+		if ( array_key_exists( $hook, $this->doc_urls ) ) {
+			$current_hook = $this->doc_urls[ $hook ];
+		}
+
+		return array_merge( $all, $current_hook );
 	}
 
 	/**

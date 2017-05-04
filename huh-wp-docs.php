@@ -41,7 +41,13 @@ function init() {
 	/**
 	 * Default docs url.
 	 */
-	$doc_urls = 'https://raw.githubusercontent.com/neverything/huh-wp-docs/master/README.md';
+	//$doc_urls = 'https://raw.githubusercontent.com/neverything/huh-wp-docs/master/README.md';
+
+	$doc_urls = [
+		'all' => 'https://raw.githubusercontent.com/neverything/huh-wp-docs/master/README.md',
+		'post.php' => 'https://gist.githubusercontent.com/neverything/4994f12366daabf2b672669161d0aed1/raw/bd2ec795c86f64ebc058de03c128ebe544f4ead3/wandeljetzt-wordpress-wandellust.md,https://gist.githubusercontent.com/neverything/105a3be234324e6b890448da14e359b5/raw/8ca588d574ef6fc8f53ff431bd3cd3d1ea3b1aa2/presence-workshop-2017-01-11.md',
+		'edit.php' => 'https://gist.githubusercontent.com/neverything/4994f12366daabf2b672669161d0aed1/raw/bd2ec795c86f64ebc058de03c128ebe544f4ead3/wandeljetzt-wordpress-wandellust.md,https://gist.githubusercontent.com/neverything/105a3be234324e6b890448da14e359b5/raw/8ca588d574ef6fc8f53ff431bd3cd3d1ea3b1aa2/presence-workshop-2017-01-11.md',
+	];
 
 	$plugin = new Plugin();
 	$plugin->init( $doc_urls );

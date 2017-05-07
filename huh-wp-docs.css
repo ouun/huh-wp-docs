@@ -214,6 +214,16 @@
   .huh-container--content ul,
   .huh-container--content ol {
     font-size: 14px; }
+  .huh-container--content h1,
+  .huh-container--content h2,
+  .huh-container--content h3,
+  .huh-container--content h4,
+  .huh-container--content h5,
+  .huh-container--content h6,
+  .huh-container--content p,
+  .huh-container--content ul,
+  .huh-container--content ol {
+    color: #444; }
   .huh-container--content img {
     max-width: 100%; }
   .huh-container--content code,

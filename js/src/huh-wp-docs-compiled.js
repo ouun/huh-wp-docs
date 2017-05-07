@@ -22,6 +22,13 @@ function huhInit() {
 	huhBackButton = document.querySelector('#huh-back-to-toc');
 	huhAccentColor = huhLauncher.getAttribute('data-accent-color');
 
+	if (HuhWPDocs.huhCurrentScreen) {
+		var currentScreenInfo = document.createElement('span');
+		currentScreenInfo.appendChild(document.createTextNode(HuhWPDocs.huhCurrentScreen));
+		currentScreenInfo.className = 'huh-screen-info';
+		huhLauncher.appendChild(currentScreenInfo);
+	}
+
 	var grabContent = function grabContent(url, i) {
 		return fetch(url).then(function (res) {
 			return res.text();

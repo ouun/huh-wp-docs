@@ -5,6 +5,20 @@
 	position: fixed;
 	right: 20px;
 	z-index: 500001;
+
+	.huh-screen-info {
+		position: absolute;
+		right: 55px;
+		display: inline-block;
+		font-size: 11px;
+		font-family: monospace;
+		padding: 0.375em;
+		background: antiquewhite;
+		border-radius: 3px;
+		white-space: nowrap;
+		top: 15px;
+		color: #333;
+	}
 }
 
 .huh-launcher--button {

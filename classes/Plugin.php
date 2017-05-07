@@ -170,39 +170,42 @@ class Plugin {
 
 	/**
 	 * Add data urls to the screen.
-	 *
-	 * @param string $hook current admin screen hook.
 	 */
-	public function data_urls( $hook ) {
-		if ( is_customize_preview() ) {
-			$hook = 'customizer';
+	public function data_urls() {
+		$current_screen = $this->get_current_screen_hook();
+
+		$localize = [
+			'huhDocUrl' => apply_filters( "huh_wp_docs_filter_doc_urls_{$current_screen}", $this->get_doc_urls( $current_screen ) )
+		];
+
+		if ( WP_DEBUG ) {
+			$localize['huhCurrentScreen'] = $current_screen;
 		}
+
 		wp_localize_script(
 			'huh_script',
 			'HuhWPDocs',
-			[
-				'huhDocUrl' => apply_filters( "huh_wp_docs_filter_doc_urls_{$hook}", $this->get_doc_urls( $hook ) )
-			]
+			$localize
 		);
 	}
 
 	/**
 	 * Prepare the doc urls.
 	 *
-	 * @param string $hook current screen hook.
+	 * @param string $current_screen current screen hook.
 	 *
-	 * @return array of doc urls for this hook.
+	 * @return array of doc urls for this screen.
 	 */
-	public function get_doc_urls( $hook ) {
-		$all = [];
+	public function get_doc_urls( $current_screen ) {
+		$all          = [];
 		$current_hook = [];
 
 		if ( array_key_exists( 'all', $this->doc_urls ) ) {
 			$all = $this->doc_urls['all'];
 		}
 
-		if ( array_key_exists( $hook, $this->doc_urls ) ) {
-			$current_hook = $this->doc_urls[ $hook ];
+		if ( array_key_exists( $current_screen, $this->doc_urls ) ) {
+			$current_hook = $this->doc_urls[ $current_screen ];
 		}
 
 		return array_merge( $all, $current_hook );

@@ -27,14 +27,15 @@ function huhInit() {
 		huhLauncher.appendChild(currentScreenInfo);
 	}
 
-	const grabContent = (url, i) => fetch(url)
-	     .then(res => res.text())
-	     .then(data => huhData.push({ index: i, data: data }) )
+	if ( HuhWPDocs.huhDocUrl ) {
+		const grabContent = (url, i) => fetch(url)
+			.then(res => res.text())
+			.then(data => huhData.push({index: i, data: data}))
 
-	Promise
-	    .all(HuhWPDocs.huhDocUrl.map(grabContent))
-	    .then(() => loadContent( huhData ) )
-
+		Promise
+			.all(HuhWPDocs.huhDocUrl.map(grabContent))
+			.then(() => loadContent(huhData))
+	}
 }
 
 function loadContent( data ) {

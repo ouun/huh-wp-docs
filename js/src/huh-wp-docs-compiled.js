@@ -29,17 +29,19 @@ function huhInit() {
 		huhLauncher.appendChild(currentScreenInfo);
 	}
 
-	var grabContent = function grabContent(url, i) {
-		return fetch(url).then(function (res) {
-			return res.text();
-		}).then(function (data) {
-			return huhData.push({ index: i, data: data });
-		});
-	};
+	if (HuhWPDocs.huhDocUrl) {
+		var grabContent = function grabContent(url, i) {
+			return fetch(url).then(function (res) {
+				return res.text();
+			}).then(function (data) {
+				return huhData.push({ index: i, data: data });
+			});
+		};
 
-	Promise.all(HuhWPDocs.huhDocUrl.map(grabContent)).then(function () {
-		return loadContent(huhData);
-	});
+		Promise.all(HuhWPDocs.huhDocUrl.map(grabContent)).then(function () {
+			return loadContent(huhData);
+		});
+	}
 }
 
 function loadContent(data) {

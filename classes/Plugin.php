@@ -151,11 +151,75 @@ class Plugin {
 	}
 
 	/**
-	 * Handle different cases of doc urls.
+	 * Helper to get current screen info ex. <code>edit.php?post_type=page</code>
+	 * Includes the taxonomy and post_type, works in customize preview too.
+	 *
+	 * @return string current screen info.
+	 */
+	protected function get_current_screen_hook() {
+		/**
+		 * Array of potential query args to add.
+		 */
+		$query_args = [];
+
+		if ( is_admin() ) {
+			/**
+			 * Use the $pagenow global, for ex. <code>edit.php</code>
+			 */
+			global $pagenow;
+
+			/**
+			 * Get the current WP_Screen object.
+			 */
+			$current_screen = get_current_screen();
+
+			/**
+			 * Check and set taxonomy if we have one.
+			 */
+			if ( $current_screen->taxonomy ) {
+				$query_args['taxonomy'] = $current_screen->taxonomy;
+			}
+
+			/**
+			 * Check and set custom post type if we have one.
+			 */
+			if ( $current_screen->post_type ) {
+				$query_args['post_type'] = $current_screen->post_type;
+			}
+		} else if ( is_customize_preview() ) {
+			/**
+			 * Override $pagenow with identifier for the customize preview.
+			 */
+			$pagenow = 'customize.php';
+		} else {
+			return; // Bailout if this method gets called somewhere else.
+		}
+
+		/**
+		 * Return a string containing all necessary info to be checked against.
+		 */
+		return add_query_arg( $query_args, $pagenow );
+	}
+
+	/**
+	 * Set the urls to be used as docs.
 	 *
 	 * @param mixed $urls set of urls for markdown docs.
 	 */
 	public function set_doc_urls( $urls ) {
+		$urls = $this->prepare_doc_urls( $urls );
+		$urls = apply_filters( 'huh_wp_docs_filter_doc_urls', $urls );
+		$this->doc_urls = $this->prepare_doc_urls( $urls );
+	}
+
+	/**
+	 * Clean up and prepare the several url formats to be used.
+	 *
+	 * @param mixed $urls array or string with comma separated urls.
+	 *
+	 * @return array $doc_urls sanitized format of urls.
+	 */
+	protected function prepare_doc_urls( $urls ) {
 		$doc_urls = [];
 		if ( is_array( $urls ) && ! empty( $urls ) ) {
 			foreach ( $urls as $k => $v ) {
@@ -170,8 +234,7 @@ class Plugin {
 			// Explode URLs and Trim Whitespace
 			$doc_urls['all'] = array_map( 'trim', explode( ',', $urls ) );
 		}
-
-		$this->doc_urls = apply_filters( 'huh_wp_docs_filter_doc_urls', $doc_urls );
+		return $doc_urls;
 	}
 
 	/**
@@ -181,7 +244,7 @@ class Plugin {
 		$current_screen = $this->get_current_screen_hook();
 
 		$localize = [
-			'huhDocUrl' => apply_filters( "huh_wp_docs_filter_doc_urls_{$current_screen}", $this->get_doc_urls( $current_screen ) )
+			'huhDocUrl' => apply_filters( "huh_wp_docs_filter_doc_urls-{$current_screen}", $this->get_doc_urls( $current_screen ) )
 		];
 
 		if ( WP_DEBUG ) {

@@ -78,9 +78,13 @@ class Plugin {
 	 * Hooks to enqueue docs on the front-end, for example in the customizer.
 	 */
 	public function frontend_hooks() {
-		add_action( 'wp_enqueue_scripts', [ $this, 'customizer_preview_load_scripts' ] );
-		add_action( 'wp_enqueue_scripts', [ $this, 'data_urls' ] );
-		add_action( 'wp_footer', [ $this, 'display' ] );
+		if ( array_key_exists( 'all', $this->doc_urls )
+		     || array_key_exists( 'customize.php', $this->doc_urls )
+		) {
+			add_action( 'wp_enqueue_scripts', [ $this, 'customizer_preview_load_scripts' ] );
+			add_action( 'wp_enqueue_scripts', [ $this, 'data_urls' ] );
+			add_action( 'wp_footer', [ $this, 'display' ] );
+		}
 	}
 
 	/**
@@ -93,19 +97,15 @@ class Plugin {
 
 	/**
 	 * Determine current screen.
-	 *
-	 * @param string $hook current screen.
 	 */
-	public function admin_load_scripts( $hook ) {
-		if ( ! is_customize_preview() ) {
-
+	public function admin_load_scripts() {
+		if ( ! is_customize_preview()
+		     && ( array_key_exists( 'all', $this->doc_urls )
+		          || array_key_exists( $this->get_current_screen_hook(), $this->doc_urls ) )
+		) {
 			wp_enqueue_style( 'huh_style' );
 			wp_enqueue_script( 'huh_script' );
-
-			/**
-			 * Fire the display action based on the current screen.
-			 */
-			add_action( "admin_footer-{$hook}", [ $this, 'display' ] );
+			add_action( 'admin_footer', [ $this, 'display' ] );
 		}
 	}
 

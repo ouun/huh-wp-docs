@@ -29,8 +29,14 @@ class Plugin {
 	 */
 	public function init( $doc_urls ) {
 
+		/**
+		 * Set the initial doc urls.
+		 */
 		$this->set_doc_urls( $doc_urls );
 
+		/**
+		 * Initialize the plugin.
+		 */
 		$this->hooks();
 
 	}

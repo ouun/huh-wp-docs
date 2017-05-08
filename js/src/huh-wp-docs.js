@@ -42,7 +42,7 @@ function loadContent( data ) {
 	let dataRaw = '';
 	data = _.sortBy(data, 'index');
 	data.forEach(function( obj ){
-		dataRaw += obj.data;
+		dataRaw += obj.data + '\n';
 	});
 	// first we format the content
 	const dataFormat = marked( dataRaw );

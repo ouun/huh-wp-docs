@@ -48,7 +48,7 @@ function loadContent(data) {
 	var dataRaw = '';
 	data = _.sortBy(data, 'index');
 	data.forEach(function (obj) {
-		dataRaw += obj.data;
+		dataRaw += obj.data + '\n';
 	});
 	// first we format the content
 	var dataFormat = marked(dataRaw);

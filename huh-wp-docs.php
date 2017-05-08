@@ -3,7 +3,7 @@
  * @wordpress-plugin
  * Plugin Name: Huh! WP Docs
  * Plugin URI:  https://required.com
- * Description: Connector plugin for OpenInbound.com.
+ * Description: Show help docs easily in the WordPress admin and the theme customizer.
  * Version:     1.0.0
  * Author:      required
  * Author URI:  https://required.com

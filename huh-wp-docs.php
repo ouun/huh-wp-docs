@@ -10,6 +10,7 @@
  * Text Domain: huh-wp-docs
  * License:     GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
+ * GitHub Plugin URI: wearerequired/huh-wp-docs
  *
  *
  * Note: This plugin is based on the awesome <https://secretpizza.party/huh-making-documentation-easier/> and a fork of
